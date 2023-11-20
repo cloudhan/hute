@@ -30,7 +30,7 @@
  **************************************************************************************************/
 #pragma once
 
-#if defined(__CUDACC__) || defined(_NVHPC_CUDA)
+#if defined(__CUDACC__) || defined(_NVHPC_CUDA) || defined(__HIPCC__)
 #  define CUTE_HOST_DEVICE __forceinline__ __host__ __device__
 #  define CUTE_DEVICE      __forceinline__          __device__
 #  define CUTE_HOST        __forceinline__ __host__
@@ -58,7 +58,7 @@
 #  define CUTE_NO_UNROLL
 #endif // CUTE_UNROLL
 
-#if defined(__CUDA_ARCH__) || defined(_NVHPC_CUDA)
+#if defined(__CUDA_ARCH__) || defined(_NVHPC_CUDA) || defined(__HIPCC__)
 #  define CUTE_INLINE_CONSTANT                 static const __device__
 #else
 #  define CUTE_INLINE_CONSTANT                 static constexpr
