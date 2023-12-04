@@ -50,7 +50,7 @@ namespace cute
  * Formats and prints the given message to stdout
  */
 #if !defined(CUTE_LOG)
-#  if !defined(__CUDA_ARCH__)
+#  if !defined(__CUDA_ARCH__) && !defined(__HIPCC__)
 #    define CUTE_LOG(format, ...) printf(format, __VA_ARGS__)
 #  else
 #    define CUTE_LOG(format, ...)                                \
@@ -122,7 +122,7 @@ CUTE_HOST_DEVICE
 bool
 block(int bid)
 {
-#if defined(__CUDA_ARCH__)
+#if defined(__CUDA_ARCH__) || defined(__HIPCC__)
   return blockIdx.x + blockIdx.y*gridDim.x + blockIdx.z*gridDim.x*gridDim.y == bid;
 #else
   return true;
@@ -133,7 +133,7 @@ CUTE_HOST_DEVICE
 bool
 thread(int tid, int bid)
 {
-#if defined(__CUDA_ARCH__)
+#if defined(__CUDA_ARCH__) || defined(__HIPCC__)
   return (threadIdx.x + threadIdx.y*blockDim.x + threadIdx.z*blockDim.x*blockDim.y == tid) && block(bid);
 #else
   return true;
