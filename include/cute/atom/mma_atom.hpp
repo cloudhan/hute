@@ -355,22 +355,22 @@ struct TiledMMA : MMA_Atom
   }
 
   template <class ThrIdx,
-            __CUTE_REQUIRES(is_integral<ThrIdx>::value)>
+            __CUTE_REQUIRES(is_integral<detail::hip_coordinates::adapt_t<ThrIdx>>::value)>
   CUTE_HOST_DEVICE constexpr
   auto
   get_slice(ThrIdx const& thr_idx) const
   {
-    auto thr_vmnk = thr_layout_vmnk_.get_flat_coord(thr_idx);
+    auto thr_vmnk = thr_layout_vmnk_.get_flat_coord(detail::hip_coordinates::adapt(thr_idx));
     return ThrMMA<TiledMMA, decltype(thr_vmnk)>{*this, thr_vmnk};
   }
 
   template <class ThrIdx,
-            __CUTE_REQUIRES(is_integral<ThrIdx>::value)>
+            __CUTE_REQUIRES(is_integral<detail::hip_coordinates::adapt_t<ThrIdx>>::value)>
   CUTE_HOST_DEVICE constexpr
   auto
   get_thread_slice(ThrIdx const& thr_idx) const
   {
-    return get_slice(thr_idx);
+    return get_slice(detail::hip_coordinates::adapt(thr_idx));
   }
 
   //
