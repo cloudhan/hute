@@ -63,6 +63,30 @@ namespace cute
 namespace detail
 {
 
+namespace hip_coordinates {
+
+template <typename T>
+constexpr bool is_dim_value_v =
+    is_same_v<T, __HIP_Coordinates<__HIP_ThreadIdx>::__X> || is_same_v<T, __HIP_Coordinates<__HIP_ThreadIdx>::__Y> || is_same_v<T, __HIP_Coordinates<__HIP_ThreadIdx>::__Z> ||
+    is_same_v<T, __HIP_Coordinates<__HIP_BlockDim>::__X> || is_same_v<T, __HIP_Coordinates<__HIP_BlockDim>::__Y> || is_same_v<T, __HIP_Coordinates<__HIP_BlockDim>::__Z> ||
+    is_same_v<T, __HIP_Coordinates<__HIP_BlockIdx>::__X> || is_same_v<T, __HIP_Coordinates<__HIP_BlockIdx>::__Y> || is_same_v<T, __HIP_Coordinates<__HIP_BlockIdx>::__Z> ||
+    is_same_v<T, __HIP_Coordinates<__HIP_GridDim>::__X> || is_same_v<T, __HIP_Coordinates<__HIP_GridDim>::__Y> || is_same_v<T, __HIP_Coordinates<__HIP_GridDim>::__Z>;
+
+template <typename T>
+using adapt_t = conditional_t<is_dim_value_v<T>, int, T>;
+
+template <typename U>
+constexpr const static auto adapt(U&& v) {
+  using T = remove_cv_t<remove_const_t<remove_reference_t<U>>>;
+  if constexpr (is_dim_value_v<T>) {
+    return static_cast<int>(v);
+  } else {
+    return std::forward<U>(v);
+  }
+}
+
+} // end namespace hip_coordinates
+
 // EBO stands for "empty base optimization."
 // We use this technique to ensure that cute::tuple
 // doesn't need to waste space storing any template arguments
@@ -178,6 +202,14 @@ struct TupleBase<index_sequence<I...>, T...>
 template <class... T>
 struct tuple : detail::TupleBase<make_index_sequence<sizeof...(T)>, T...>
 {
+  // NOTE: HIP defines a lot of stupid things like __HIP_Coordinates<__HIP_ThreadIdx>,
+  // the arithmetics defined on the type is not complete, then cause the cute
+  // algebra imcomplete. They are not easily fixable, so we exclude those
+  // objects from the algebra at all. For convenience, we automatically adapt
+  // values in value-based implementation, that is make_*, for example,
+  // make_shape and make_layout.
+  static_assert((!detail::hip_coordinates::is_dim_value_v<T> && ...));
+
   CUTE_HOST_DEVICE constexpr
   tuple() {}
 
@@ -257,10 +289,10 @@ struct is_tuple : decltype(detail::has_tuple_size((T*)0)) {};
 
 template <class... T>
 CUTE_HOST_DEVICE constexpr
-tuple<T...>
+tuple<detail::hip_coordinates::adapt_t<T>...>
 make_tuple(T const&... t)
 {
-  return {t...};
+  return {detail::hip_coordinates::adapt(t)...};
 }
 
 //

@@ -56,27 +56,27 @@ using Coord = cute::tuple<Coords...>;
 
 template <class... Ts>
 CUTE_HOST_DEVICE constexpr
-Shape<Ts...>
+Shape<detail::hip_coordinates::adapt_t<Ts>...>
 make_shape(Ts const&... t) {
-  return {t...};
+  return {detail::hip_coordinates::adapt(t)...};
 }
 template <class... Ts>
 CUTE_HOST_DEVICE constexpr
-Stride<Ts...>
+Stride<detail::hip_coordinates::adapt_t<Ts>...>
 make_stride(Ts const&... t) {
-  return {t...};
+  return {detail::hip_coordinates::adapt(t)...};
 }
 template <class... Ts>
 CUTE_HOST_DEVICE constexpr
-Step<Ts...>
+Step<detail::hip_coordinates::adapt_t<Ts>...>
 make_step(Ts const&... t) {
-  return {t...};
+  return {detail::hip_coordinates::adapt(t)...};
 }
 template <class... Ts>
 CUTE_HOST_DEVICE constexpr
-Coord<Ts...>
+Coord<detail::hip_coordinates::adapt_t<Ts>...>
 make_coord(Ts const&... t) {
-  return {t...};
+  return {detail::hip_coordinates::adapt(t)...};
 }
 
 

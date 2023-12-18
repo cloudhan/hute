@@ -402,22 +402,22 @@ struct TiledMMA : MMA_Atom
   }
 
   template <class ThrIdx,
-            __CUTE_REQUIRES(is_integral<ThrIdx>::value)>
+            __CUTE_REQUIRES(is_integral<detail::hip_coordinates::adapt_t<ThrIdx>>::value)>
   CUTE_HOST_DEVICE static constexpr
   auto
   get_slice(ThrIdx const& thr_idx)
   {
-    auto thr_vmnk = ThrLayoutVMNK{}.get_flat_coord(thr_idx);
+    auto thr_vmnk = ThrLayoutVMNK{}.get_flat_coord(detail::hip_coordinates::adapt(thr_idx));
     return ThrMMA<TiledMMA, decltype(thr_vmnk)>(thr_vmnk);
   }
 
   template <class ThrIdx,
-            __CUTE_REQUIRES(is_integral<ThrIdx>::value)>
+            __CUTE_REQUIRES(is_integral<detail::hip_coordinates::adapt_t<ThrIdx>>::value)>
   CUTE_HOST_DEVICE static constexpr
   auto
   get_thread_slice(ThrIdx const& thr_idx)
   {
-    return get_slice(thr_idx);
+    return get_slice(detail::hip_coordinates::adapt(thr_idx));
   }
 
   //
