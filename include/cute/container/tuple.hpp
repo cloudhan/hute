@@ -74,23 +74,23 @@ namespace detail
 
 namespace hip_coordinates {
 
-template <typename T>
+template <typename T_, typename T = remove_cv_t<remove_const_t<remove_reference_t<T_>>>>
 constexpr bool is_dim_value_v =
-    is_same_v<T, __HIP_Coordinates<__HIP_ThreadIdx>::__X> || is_same_v<T, __HIP_Coordinates<__HIP_ThreadIdx>::__Y> || is_same_v<T, __HIP_Coordinates<__HIP_ThreadIdx>::__Z> ||
-    is_same_v<T, __HIP_Coordinates<__HIP_BlockDim>::__X> || is_same_v<T, __HIP_Coordinates<__HIP_BlockDim>::__Y> || is_same_v<T, __HIP_Coordinates<__HIP_BlockDim>::__Z> ||
-    is_same_v<T, __HIP_Coordinates<__HIP_BlockIdx>::__X> || is_same_v<T, __HIP_Coordinates<__HIP_BlockIdx>::__Y> || is_same_v<T, __HIP_Coordinates<__HIP_BlockIdx>::__Z> ||
-    is_same_v<T, __HIP_Coordinates<__HIP_GridDim>::__X> || is_same_v<T, __HIP_Coordinates<__HIP_GridDim>::__Y> || is_same_v<T, __HIP_Coordinates<__HIP_GridDim>::__Z>;
+    !std::is_integral_v<T_> && (
+    is_same_v<T, std::remove_cv_t<decltype(threadIdx.x)>> || is_same_v<T, std::remove_cv_t<decltype(threadIdx.y)>> || is_same_v<T, std::remove_cv_t<decltype(threadIdx.z)>> ||
+    is_same_v<T, std::remove_cv_t<decltype(blockDim.x)>> || is_same_v<T, std::remove_cv_t<decltype(blockDim.y)>> || is_same_v<T, std::remove_cv_t<decltype(blockDim.z)>> ||
+    is_same_v<T, std::remove_cv_t<decltype(blockIdx.x)>> || is_same_v<T, std::remove_cv_t<decltype(blockIdx.y)>> || is_same_v<T, std::remove_cv_t<decltype(blockIdx.z)>> ||
+    is_same_v<T, std::remove_cv_t<decltype(gridDim.x)>> || is_same_v<T, std::remove_cv_t<decltype(gridDim.y)>> || is_same_v<T, std::remove_cv_t<decltype(gridDim.z)>> );
 
 template <typename T>
-using adapt_t = conditional_t<is_dim_value_v<T>, int, T>;
+using adapt_t = conditional_t<is_dim_value_v<T>, unsigned int, T>;
 
-template <typename U>
-constexpr const static auto adapt(U&& v) {
-  using T = remove_cv_t<remove_const_t<remove_reference_t<U>>>;
+template <typename T>
+constexpr const static auto adapt(T&& v) {
   if constexpr (is_dim_value_v<T>) {
-    return static_cast<int>(v);
+    return static_cast<unsigned int>(v);
   } else {
-    return std::forward<U>(v);
+    return std::forward<T>(v);
   }
 }
 
