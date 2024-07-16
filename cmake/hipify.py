@@ -18,6 +18,8 @@ def hipify(perl_path, hipify_perl_path, src_file_path, dst_file_path):
   s = "#include <hip/hip_runtime.h>\n" + s
 
   # patch includes
+  s = s.replace("<cuda_bf16.h>", "<hip/hip_bf16.h>")
+  s = s.replace('"cuda_bf16.h"', '"hip/hip_bf16.h"')
   # s = s.replace("#include <cute/", "#include <hute/")
   # s = s.replace('#include "cute/', '#include "hute/')
   s = s.replace("/cuda_types.hpp>\n", "/rocm_types.hpp>\n")
@@ -30,6 +32,9 @@ def hipify(perl_path, hipify_perl_path, src_file_path, dst_file_path):
 
   # patch for misc language features
   s = s.replace(" __align__(", " alignas(")
+
+  # patch for misc builtin types
+  s = re.sub(r'([^_])(hip_bfloat16)', r"\g<1>__\g<2>", s)  # hip_bfloat16 -> __hip_bfloat16
 
   with open(dst_file_path, "w") as f:
     f.write(s)
